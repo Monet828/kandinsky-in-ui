@@ -9,6 +9,19 @@ Wassily Kandinsky の幾何学抽象（円の重なり・細い直線/弧・鋭�
 Reactアダプタ（`primitives.tsx` / `KandinskyField.tsx` / `KandinskyIcon.tsx`）で構成されている。
 外部からは `index.ts` 経由でのみimportする前提。
 
+## 相対importの拡張子について
+
+このパッケージの相対importには明示的に `.js` 拡張子を付けている
+（例: `from "./tokens.js"`。ソースは `.ts`/`.tsx`）。これは `tsc` でコンパイルした
+`dist/` を素の Node.js の ESM `import` から解決できるようにするために必要
+（拡張子なしだと `ERR_MODULE_NOT_FOUND` になる）。
+
+**このコードを他のNext.js/Turbopackプロジェクトに埋め込みソースとして
+コピーする場合、この拡張子は外すこと。** Turbopackは `.js` 拡張子のimportを
+実際に存在する `.js` ファイルとして解決しようとし、ソースが `.ts`/`.tsx` しか
+無い場合はビルドが壊れる（このリポジトリの姉妹版である Unit Console アプリの
+`app/src/kandinsky/` で実際に踏んだ問題）。
+
 ## 状態
 
 社内ツールのデザイン探索から生まれ、`app/src/kandinsky/` からこのリポジトリとして

@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
-import { KANDINSKY_INK } from "./tokens";
+import { KANDINSKY_INK } from "./tokens.js";
 
 /**
  * Kandinsky in UI — 単体で使える形状プリミティブ。

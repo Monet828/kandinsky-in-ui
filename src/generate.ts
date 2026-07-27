@@ -11,8 +11,8 @@
  * はこれを描画するReact向けの薄いアダプタという位置づけ。
  */
 
-import { createSeededRandom } from "./rng";
-import { KANDINSKY_PALETTE, KANDINSKY_INK, type KandinskyDensity } from "./tokens";
+import { createSeededRandom } from "./rng.js";
+import { KANDINSKY_PALETTE, KANDINSKY_INK, type KandinskyDensity } from "./tokens.js";
 
 export type KandinskyShape =
   | { kind: "circle"; cx: number; cy: number; r: number; color: string; opacity: number }
@@ -134,12 +134,19 @@ export function generateKandinskyIcon(seed: string, size = 24): KandinskyIconCom
   const rand = createSeededRandom(`${seed}:icon`);
   const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(rand() * arr.length)];
 
+  // 円が2個しかないため、重複ありで色を選ぶと1/6の確率で同色になり単色の塊に見えてしまう
+  // （500seedの監査で実測16.4%が単色化することを確認）。2個目は1個目と異なる色のみから選ぶ。
   const circles: KandinskyIconCircle[] = [];
+  let previousColor: string | null = null;
   for (let i = 0; i < 2; i++) {
     const r = size * 0.24 + rand() * size * 0.1;
     const cx = size * 0.22 + rand() * size * 0.56;
     const cy = size * 0.22 + rand() * size * 0.56;
-    circles.push({ cx, cy, r, color: pick(KANDINSKY_PALETTE) });
+    const candidates: readonly string[] =
+      previousColor === null ? KANDINSKY_PALETTE : KANDINSKY_PALETTE.filter((c) => c !== previousColor);
+    const color: string = pick(candidates);
+    previousColor = color;
+    circles.push({ cx, cy, r, color });
   }
   return { circles };
 }

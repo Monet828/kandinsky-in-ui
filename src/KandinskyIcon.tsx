@@ -1,5 +1,5 @@
-import { generateKandinskyIcon } from "./generate";
-import { KandinskyCircle } from "./primitives";
+import { generateKandinskyIcon } from "./generate.js";
+import { KandinskyCircle } from "./primitives.js";
 
 export interface KandinskyIconProps {
   /** 同じseedなら常に同じ見た目になる。固定のブランドマークとして使うなら固定文字列を渡す */

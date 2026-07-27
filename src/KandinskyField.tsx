@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, type CSSProperties } from "react";
-import { generateKandinskyComposition } from "./generate";
-import { KandinskyCircle, KandinskyLine, KandinskyArc, KandinskyTriangle, KandinskyCheckerGrid } from "./primitives";
-import type { KandinskyDensity } from "./tokens";
+import { generateKandinskyComposition } from "./generate.js";
+import { KandinskyCircle, KandinskyLine, KandinskyArc, KandinskyTriangle, KandinskyCheckerGrid } from "./primitives.js";
+import type { KandinskyDensity } from "./tokens.js";
 
 export interface KandinskyFieldProps {
   /** 同じseedなら常に同じ構図になる。UnitのIDや名前を渡すとUnitごとの見た目になる */

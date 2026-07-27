@@ -9,8 +9,8 @@
  */
 
 // 完成品コンポーネント（すぐ使える）
-export { KandinskyField, type KandinskyFieldProps } from "./KandinskyField";
-export { KandinskyIcon, type KandinskyIconProps } from "./KandinskyIcon";
+export { KandinskyField, type KandinskyFieldProps } from "./KandinskyField.js";
+export { KandinskyIcon, type KandinskyIconProps } from "./KandinskyIcon.js";
 
 // 単体プリミティブ（自分で構図を組みたい場合）
 export {
@@ -24,7 +24,7 @@ export {
   type KandinskyArcProps,
   type KandinskyTriangleProps,
   type KandinskyCheckerGridProps,
-} from "./primitives";
+} from "./primitives.js";
 
 // 構図生成（Reactに依存しない。独自コンポーネントを組みたい場合の土台）
 export {
@@ -34,10 +34,10 @@ export {
   type KandinskyComposition,
   type KandinskyIconCircle,
   type KandinskyIconComposition,
-} from "./generate";
+} from "./generate.js";
 
 // 決定論的乱数（独自の生成ロジックを書きたい場合）
-export { createSeededRandom, mulberry32, hashSeed } from "./rng";
+export { createSeededRandom, mulberry32, hashSeed } from "./rng.js";
 
 // トークン
-export { KANDINSKY_PALETTE, KANDINSKY_INK, KANDINSKY_BACKGROUND, type KandinskyDensity } from "./tokens";
+export { KANDINSKY_PALETTE, KANDINSKY_INK, KANDINSKY_BACKGROUND, type KandinskyDensity } from "./tokens.js";
