@@ -11,6 +11,8 @@
 // 完成品コンポーネント（すぐ使える）
 export { KandinskyField, type KandinskyFieldProps } from "./KandinskyField.js";
 export { KandinskyIcon, type KandinskyIconProps } from "./KandinskyIcon.js";
+export { KandinskyPanel, type KandinskyPanelProps } from "./KandinskyPanel.js";
+export { KandinskyEmptyState, type KandinskyEmptyStateProps } from "./KandinskyEmptyState.js";
 
 // 単体プリミティブ（自分で構図を組みたい場合）
 export {

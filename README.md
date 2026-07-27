@@ -11,6 +11,10 @@ Wassily Kandinsky の幾何学抽象（円の重なり・細い直線/弧・鋭�
 実際に呼んで書き出したもの（`npm run demo` で再生成される）。生成ロジックを変更したら
 再生成すること。手描きのサンプルは実装とすぐ食い違うため置かない。
 
+合成コンポーネント（`KandinskyEmptyState` / `KandinskyPanel`）の見た目は
+`npm run demo:recipes` で `demo/recipes.html` を書き出し、ブラウザで開いて確認する
+（明るい面・紙の面・暗い面の3列を並べて比較できる）。
+
 フレームワーク非依存のロジック（`generate.ts` / `rng.ts` / `tokens.ts`）と、
 Reactアダプタ（`primitives.tsx` / `KandinskyField.tsx` / `KandinskyIcon.tsx`）で構成されている。
 外部からは `index.ts` 経由でのみimportする前提。
@@ -100,6 +104,60 @@ import { KandinskyField, KandinskyIcon, KandinskyCircle } from "kandinsky-in-ui"
 | `radiusScale` | `number` | `1.3` | 円の大きさの係数。複数seed・複数倍率を見比べて確定した値（1.6以上にすると円がviewBox端で欠け始める） |
 | `palette` | `readonly string[]` | house palette | 円に使う色の候補 |
 
+### `KandinskyEmptyState` — 「まだ1件も無い」状態の完成品
+
+```tsx
+<KandinskyEmptyState
+  seed="tasks-empty"
+  title="タスクがまだありません"
+  description="Slack取込・AI抽出・手動追加から積み上がっていきます"
+  action={<button onClick={onAdd}>手動で追加</button>}
+/>
+```
+
+**使う場面を間違えないこと。**
+
+- ✅ 初回状態・まだデータが一件も無い状態。ユーザーがこれから何をすればいいかを
+  説明する余白があり、装飾が機能する。
+- ❌ **絞り込み・検索の結果0件**（例:「該当するアカウントがありません」）。
+  こちらは一覧の中に一瞬出ては消える表示で、入力のたびに装飾が点滅して邪魔になる。
+  素の一行テキストのままにしておく。
+
+| prop | 型 | 既定値 | 説明 |
+|---|---|---|---|
+| `seed` | `string` | — | 装飾を決定する文字列。画面ごとに固定文字列を渡す |
+| `title` | `string` | — | 見出し |
+| `description` | `string` | — | 説明文（横に伸びすぎないよう内部で幅上限あり） |
+| `action` | `ReactNode` | — | ボタンを置く枠。**ボタン自体はこのシステムでは提供しない**（アプリ側のボタンを渡す。装飾の言語だけを担当し、操作部品の見た目には踏み込まないという線引き） |
+| `mark` | `ReactNode \| false` | seedから生成した`KandinskyIcon` | 見出しの上のマーク。`false`で非表示 |
+| `bordered` | `boolean` | `true` | 「空の枠」を示す破線の枠 |
+| `density` / `palette` / `animated` | — | `"sm"` / house / `true` | `KandinskyField`と同じ |
+
+### `KandinskyPanel` — 装飾を背面に敷いた「面」の土台
+
+`KandinskyEmptyState`の土台。設定画面の見出しやオンボーディングなど、
+任意の中身を載せたい場合はこちらを直接使う。position/overflow/マスクの
+決まりごとを毎回書かずに済む。
+
+```tsx
+<KandinskyPanel seed="settings-header" padding="28px 24px">
+  <h2>通知の設定</h2>
+  <p>Slackへの通知先とタイミングを変更できます。</p>
+</KandinskyPanel>
+```
+
+| prop | 型 | 既定値 | 説明 |
+|---|---|---|---|
+| `seed` | `string` | — | 装飾を決定する文字列 |
+| `decorationOpacity` | `number` | `0.75` | 装飾の不透明度。文字が上に載る前提のため`KandinskyField`単体より弱めている |
+| `fadeCenter` | `boolean` | `true` | 中央（コンテンツが載る場所）の装飾をマスクで抜く。falseにすると文字の真下に色面が来て可読性が落ちる |
+| `width` / `height` | `number` | `520` / `280` | 構図を組む座標系のサイズ。**横長が既定**（下記の注意点を参照） |
+| `background` | `string` | `"transparent"` | 面の背景色。既定では敷かれた側の背景をそのまま使う |
+| `radius` / `padding` | — | `10` / — | 角丸と内側の余白 |
+
+どちらも文字色を指定せず`currentColor`を前提にしているため、ライト・ダーク
+どちらのホストに置いても、また任意のブランド色の上でも成立する。
+
 ### プリミティブ（`primitives.tsx`）— 単体で使う形状
 
 `KandinskyCircle` / `KandinskyLine` / `KandinskyArc` / `KandinskyRing` /
@@ -165,6 +223,11 @@ house palette（`KANDINSKY_PALETTE`）以外のブランドカラーを使いた
 固定化している。** 生成ロジックのパラメータを変更する際は、必ず先にこのテストを
 通してから反映すること。CIでもpush/PRごとに自動実行される（`.github/workflows/test.yml`）。
 
+コンポーネント層は `test/ssr.test.mjs` で `react-dom/server` を使って実際に描画し、
+「同じseedなら同じマークアップになる」（ハイドレーション不整合の最低条件）と、
+propsの分岐が出力に効いていることを確認している。
+**見た目の良し悪しは自動テストでは分からない。そこは実機で見ること。**
+
 ## 既知の注意点
 
 - SVGの `Math.cos`/`Math.sin` はSSR(Node)とCSR(ブラウザ)でV8のビルドが異なると
@@ -173,3 +236,11 @@ house palette（`KANDINSKY_PALETTE`）以外のブランドカラーを使いた
   対処済み。同様の計算を追加する場合は同じ丸めを行うこと。
 - 円が3つ以上小さいサイズで重なると `mix-blend-mode: multiply` で黒く潰れる。
   アイコン用途では円を2つまでに抑えている。
+- **構図を組む座標系の縦横比を、実際に敷く面の縦横比から大きく離さないこと。**
+  円の半径は生成時の`width`から導かれ、描画時は`preserveAspectRatio="slice"`
+  （縦横比を保った拡大・トリミング）で面を覆う。そのため縦長(480x800)の構図を
+  横長で背の低い面に敷くと、巨大な円のごく一部だけが見える状態になり、
+  幾何形ではなく霞のような薄い色面になる（`KandinskyPanel`の既定を520x280の
+  横長にしているのはこれが理由。実装当初は縦長の既定のままで、実際にこの症状が出た）。
+- `KandinskyPanel`は背の低い面（高さ100px前後）では装飾が密に見えることがある。
+  その場合は`decorationOpacity`を下げるか`density="sm"`にする。

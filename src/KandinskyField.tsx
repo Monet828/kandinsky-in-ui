@@ -21,6 +21,11 @@ export interface KandinskyFieldProps {
   height?: number;
   className?: string;
   /**
+   * `<svg>`に直接渡すスタイル。Tailwind等のクラスが使えない文脈
+   * （このパッケージ自身の合成コンポーネントなど）でサイズを指定するための口。
+   */
+  style?: CSSProperties;
+  /**
    * 円の呼吸・三角形の回転・線のドリフトを付けるか。
    * Figmaのuse_figma(manualKeyframeTracks)で動きを検証した結果を
    * CSS @keyframes に翻訳したもの。デフォルトで有効。
@@ -52,6 +57,7 @@ export function KandinskyField({
   width = 480,
   height = 800,
   className,
+  style,
   animated = true,
   palette = KANDINSKY_PALETTE,
 }: KandinskyFieldProps) {
@@ -74,6 +80,7 @@ export function KandinskyField({
       // どんなコンテナサイズでも円は円のまま保たれる。
       preserveAspectRatio="xMidYMid slice"
       className={className}
+      style={style}
       aria-hidden="true"
     >
       <KandinskyStyles />

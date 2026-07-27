@@ -16,13 +16,16 @@
     "pretest": "npm run build",
     "test": "node --test test/*.test.mjs",
     "predemo": "npm run build",
-    "demo": "node demo/build-showcase.mjs"
+    "demo": "node demo/build-showcase.mjs",
+    "demo:recipes": "node demo/render-recipes.mjs",
+    "predemo:recipes": "npm run build"
   },
   "peerDependencies": {
     "react": ">=18"
   },
   "devDependencies": {
     "@types/react": "^19",
+    "react-dom": "^19",
     "typescript": "^5"
   },
   "keywords": [
