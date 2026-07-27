@@ -129,7 +129,16 @@ export interface KandinskyIconComposition {
   circles: KandinskyIconCircle[];
 }
 
-export function generateKandinskyIcon(seed: string, size = 24): KandinskyIconComposition {
+export function generateKandinskyIcon(
+  seed: string,
+  size = 24,
+  /**
+   * 半径の基準値に掛ける係数。既定は1.3（複数seed・複数倍率の見比べで確定した値。
+   * 1.6以上にすると円の中心位置の範囲が現状のままでは枠から欠けはじめるため、
+   * その場合は cx/cy の範囲も同時に狭める調整が必要）。
+   */
+  radiusScale = 1.3,
+): KandinskyIconComposition {
   // フル構図と同じseedを渡された時に見た目が連動しすぎないよう、接尾辞で名前空間を分ける。
   const rand = createSeededRandom(`${seed}:icon`);
   const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(rand() * arr.length)];
@@ -139,7 +148,7 @@ export function generateKandinskyIcon(seed: string, size = 24): KandinskyIconCom
   const circles: KandinskyIconCircle[] = [];
   let previousColor: string | null = null;
   for (let i = 0; i < 2; i++) {
-    const r = size * 0.24 + rand() * size * 0.1;
+    const r = (size * 0.24 + rand() * size * 0.1) * radiusScale;
     const cx = size * 0.22 + rand() * size * 0.56;
     const cy = size * 0.22 + rand() * size * 0.56;
     const candidates: readonly string[] =

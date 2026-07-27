@@ -7,14 +7,16 @@ export interface KandinskyIconProps {
   seed: string;
   size?: number;
   className?: string;
+  /** 円の大きさの係数。既定は1.3（複数seed・複数倍率を見比べて確定） */
+  radiusScale?: number;
 }
 
 /**
  * サイドバー等の小さいブランドマーク用。KandinskyFieldのフル構図は
  * 16-24pxでは読めないため、重なる円だけの簡易版を使う。
  */
-export function KandinskyIcon({ seed, size = 20, className }: KandinskyIconProps) {
-  const { circles } = generateKandinskyIcon(seed, 24);
+export function KandinskyIcon({ seed, size = 20, className, radiusScale = 1.3 }: KandinskyIconProps) {
+  const { circles } = generateKandinskyIcon(seed, 24, radiusScale);
 
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true">
