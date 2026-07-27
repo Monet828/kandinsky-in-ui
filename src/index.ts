@@ -17,11 +17,13 @@ export {
   KandinskyCircle,
   KandinskyLine,
   KandinskyArc,
+  KandinskyRing,
   KandinskyTriangle,
   KandinskyCheckerGrid,
   type KandinskyCircleProps,
   type KandinskyLineProps,
   type KandinskyArcProps,
+  type KandinskyRingProps,
   type KandinskyTriangleProps,
   type KandinskyCheckerGridProps,
 } from "./primitives.js";

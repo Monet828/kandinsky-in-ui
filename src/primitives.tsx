@@ -127,6 +127,30 @@ export function KandinskyArc({
   );
 }
 
+export interface KandinskyRingProps extends CommonProps {
+  cx: number;
+  cy: number;
+  r: number;
+  strokeWidth: number;
+  color: string;
+}
+
+/** 輪っか（塗りつぶし無しの太い円）。Figmaでの探索段階で使い、コードへの翻訳で一度落ちていた形状。 */
+export function KandinskyRing({ cx, cy, r, strokeWidth, color, className, style }: KandinskyRingProps) {
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={r}
+      fill="none"
+      stroke={color}
+      strokeWidth={strokeWidth}
+      className={className}
+      style={style}
+    />
+  );
+}
+
 export interface KandinskyTriangleProps extends CommonProps {
   points: [number, number][];
   color: string;

@@ -76,6 +76,7 @@ import { KandinskyField, KandinskyIcon, KandinskyCircle } from "kandinsky-in-ui"
 | `width` / `height` | `number` | `480` / `800` | 構図を組む座標系のサイズ（実際の表示サイズは`viewBox`+`preserveAspectRatio="xMidYMid slice"`で追従する） |
 | `className` | `string` | — | 親の`<svg>`に渡す |
 | `animated` | `boolean` | `true` | 円の呼吸・三角形の回転・線のドリフトを付けるか |
+| `palette` | `readonly string[]` | house palette（`KANDINSKY_PALETTE`） | 円・輪っか・三角形に使う色の候補。`useMemo`の依存配列に含めているため、呼び出し側でインライン配列リテラルを毎回渡すと再生成のたびに再計算が走る。コンポーネント外の定数として定義するか呼び出し側でメモ化すること |
 
 ### `KandinskyIcon` — 小さいブランドマーク
 
@@ -86,15 +87,43 @@ import { KandinskyField, KandinskyIcon, KandinskyCircle } from "kandinsky-in-ui"
 <KandinskyIcon seed="unit-console-brand" size={20} />
 ```
 
+| prop | 型 | 既定値 | 説明 |
+|---|---|---|---|
+| `seed` | `string` | — | 見た目を決定する文字列 |
+| `size` | `number` | `20` | 表示サイズ(px) |
+| `radiusScale` | `number` | `1.3` | 円の大きさの係数。複数seed・複数倍率を見比べて確定した値（1.6以上にすると円がviewBox端で欠け始める） |
+| `palette` | `readonly string[]` | house palette | 円に使う色の候補 |
+
 ### プリミティブ（`primitives.tsx`）— 単体で使う形状
 
-`KandinskyCircle` / `KandinskyLine` / `KandinskyArc` / `KandinskyTriangle` /
-`KandinskyCheckerGrid`。すべて`<svg>`の中で使う（自身ではsvgタグを作らない）。
-「カードの角に円を1つだけ添える」のような単発の使い方はこちらを直接使う。
+`KandinskyCircle` / `KandinskyLine` / `KandinskyArc` / `KandinskyRing` /
+`KandinskyTriangle` / `KandinskyCheckerGrid`。すべて`<svg>`の中で使う（自身では
+svgタグを作らない）。「カードの角に円を1つだけ添える」のような単発の使い方は
+こちらを直接使う。
+
+`KandinskyRing`（塗りつぶし無しの太い円=輪っか）はFigmaでの探索段階で使われていた
+形状で、一度コードへの翻訳で漏れていたものを追加した。`KandinskyField`の構図には
+density に関わらず常に1個含まれる。
 
 これらを`KandinskyField`/`KandinskyIcon`を経由せず単体で使う場合、モーションと
 ダークモード対応のCSSが自動では読み込まれないため、`<KandinskyStyles />`
 （`styles.tsx`）を一度だけどこかに描画すること。
+
+## パレットのカスタマイズ
+
+`KandinskyField` / `KandinskyIcon` はどちらも `palette` propで色の候補を差し替えられる。
+house palette（`KANDINSKY_PALETTE`）以外のブランドカラーを使いたい他プロジェクトでの
+利用を想定した口。
+
+```tsx
+<KandinskyField seed="acme-corp" palette={["#0F62FE", "#FF832B", "#24A148"]} />
+```
+
+- 3色以上を推奨。色数が少ないほど同一色が隣接する見た目になりやすい。
+- 単色（要素1個）のpaletteを渡しても壊れないようにはしてある（`KandinskyIcon`内部の
+  「直前の円と異なる色を選ぶ」フィルタが空になった場合、元のpalette全体にフォールバックする）
+  が、単色では「重なって混ざる」表現自体が成立しないため実質的には非推奨。
+- `generateKandinskyComposition` / `generateKandinskyIcon` を直接呼ぶ場合も同じ引数がある。
 
 ## ダークモード対応
 

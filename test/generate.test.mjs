@@ -44,11 +44,45 @@ test(`generateKandinskyComposition: ${N_AUDIT}seedにわたり、退化した図
         assert.ok(s.opacity > 0 && s.opacity <= 1, `[${seed}] circle opacity out of range: ${s.opacity}`);
         assert.ok(KANDINSKY_PALETTE.includes(s.color), `[${seed}] circle color not in palette: ${s.color}`);
       }
+      if (s.kind === "ring") {
+        assert.ok(s.r > 0 && Number.isFinite(s.r), `[${seed}] ring radius invalid: ${s.r}`);
+        assert.ok(s.strokeWidth > 0 && Number.isFinite(s.strokeWidth), `[${seed}] ring strokeWidth invalid: ${s.strokeWidth}`);
+        assert.ok(KANDINSKY_PALETTE.includes(s.color), `[${seed}] ring color not in palette: ${s.color}`);
+      }
       if (s.kind === "triangle") {
         assert.ok(triangleArea(s.points) > 1, `[${seed}] triangle is degenerate (near-zero area)`);
       }
     }
   }
+});
+
+test("generateKandinskyComposition: densityに関わらず輪っかがちょうど1個含まれる", () => {
+  for (const density of ["sm", "md", "lg"]) {
+    const { shapes } = generateKandinskyComposition("ring-count-check", W, H, density);
+    const rings = shapes.filter((s) => s.kind === "ring");
+    assert.equal(rings.length, 1, `density=${density}`);
+  }
+});
+
+test("generateKandinskyComposition: paletteを差し替えると、円・輪っか・三角形の色がその候補（+INK）からのみ選ばれる", () => {
+  const customPalette = ["#111111", "#222222", "#333333"];
+  const KANDINSKY_INK = "#14110F";
+  const { shapes } = generateKandinskyComposition("custom-palette-check", W, H, "lg", customPalette);
+  for (const s of shapes) {
+    if (s.kind === "circle" || s.kind === "ring") {
+      assert.ok(customPalette.includes(s.color), `${s.kind} color ${s.color} not in custom palette`);
+    }
+    if (s.kind === "triangle") {
+      assert.ok([...customPalette, KANDINSKY_INK].includes(s.color), `triangle color ${s.color} not in custom palette+ink`);
+    }
+  }
+});
+
+test("generateKandinskyComposition: 同じseed・paletteなら常に同じ構図（palette込みの決定論性）", () => {
+  const customPalette = ["#aaaaaa", "#bbbbbb"];
+  const a = generateKandinskyComposition("palette-determinism-check", W, H, "md", customPalette);
+  const b = generateKandinskyComposition("palette-determinism-check", W, H, "md", customPalette);
+  assert.deepEqual(a, b);
 });
 
 test(`generateKandinskyComposition: ${N_AUDIT}seedにわたり、円の色に極端な偏りが無い（6色がほぼ均等に出現する）`, () => {
@@ -90,6 +124,25 @@ test("generateKandinskyIcon: 同じseedなら常に同じ見た目（決定論�
   const a = generateKandinskyIcon("icon-determinism-check");
   const b = generateKandinskyIcon("icon-determinism-check");
   assert.deepEqual(a, b);
+});
+
+test("generateKandinskyIcon: paletteを差し替えると、その候補からのみ色が選ばれる", () => {
+  const customPalette = ["#101010", "#202020", "#303030"];
+  const { circles } = generateKandinskyIcon("custom-palette-icon-check", 24, 1.3, customPalette);
+  for (const c of circles) {
+    assert.ok(customPalette.includes(c.color), `icon circle color ${c.color} not in custom palette`);
+  }
+});
+
+test("generateKandinskyIcon: 単色のpalette（要素1個）を渡してもクラッシュしない（2個目の円は同色除外フィルタが空になるフォールバック）", () => {
+  const singleColorPalette = ["#123456"];
+  assert.doesNotThrow(() => {
+    const { circles } = generateKandinskyIcon("single-color-palette-check", 24, 1.3, singleColorPalette);
+    assert.equal(circles.length, 2);
+    for (const c of circles) {
+      assert.equal(c.color, "#123456");
+    }
+  });
 });
 
 test("generateKandinskyIcon: フル構図と同じseedを渡しても、内部で名前空間を分けているため独立した結果になる", () => {

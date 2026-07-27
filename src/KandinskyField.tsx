@@ -2,9 +2,16 @@
 
 import { useMemo, type CSSProperties } from "react";
 import { generateKandinskyComposition } from "./generate.js";
-import { KandinskyCircle, KandinskyLine, KandinskyArc, KandinskyTriangle, KandinskyCheckerGrid } from "./primitives.js";
+import {
+  KandinskyCircle,
+  KandinskyLine,
+  KandinskyArc,
+  KandinskyRing,
+  KandinskyTriangle,
+  KandinskyCheckerGrid,
+} from "./primitives.js";
 import { KandinskyStyles } from "./styles.js";
-import type { KandinskyDensity } from "./tokens.js";
+import { KANDINSKY_PALETTE, type KandinskyDensity } from "./tokens.js";
 
 export interface KandinskyFieldProps {
   /** 同じseedなら常に同じ構図になる。UnitのIDや名前を渡すとUnitごとの見た目になる */
@@ -19,6 +26,13 @@ export interface KandinskyFieldProps {
    * CSS @keyframes に翻訳したもの。デフォルトで有効。
    */
   animated?: boolean;
+  /**
+   * 円・輪っか・三角形に使う色の候補。既定は house palette。ブランドカラーへの差し替え用。
+   * useMemoの依存配列に含めているため、呼び出し側でインライン配列リテラルを
+   * 毎回渡すと再生成のたびに再計算が走る。コンポーネント外の定数として定義するか
+   * 呼び出し側でメモ化すること。
+   */
+  palette?: readonly string[];
 }
 
 /**
@@ -39,10 +53,11 @@ export function KandinskyField({
   height = 800,
   className,
   animated = true,
+  palette = KANDINSKY_PALETTE,
 }: KandinskyFieldProps) {
   const { shapes } = useMemo(
-    () => generateKandinskyComposition(seed, width, height, density),
-    [seed, width, height, density],
+    () => generateKandinskyComposition(seed, width, height, density, palette),
+    [seed, width, height, density, palette],
   );
 
   // 動かす対象は「最初の円2つ」「三角形」「最初の線」に絞る。
@@ -96,6 +111,10 @@ export function KandinskyField({
             );
           case "arc":
             return <KandinskyArc key={i} cx={shape.cx} cy={shape.cy} r={shape.r} startAngle={shape.startAngle} endAngle={shape.endAngle} />;
+          case "ring":
+            return (
+              <KandinskyRing key={i} cx={shape.cx} cy={shape.cy} r={shape.r} strokeWidth={shape.strokeWidth} color={shape.color} />
+            );
           case "triangle":
             return <KandinskyTriangle key={i} points={shape.points} color={shape.color} className={motionClass} />;
           case "checker":
