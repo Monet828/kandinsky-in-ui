@@ -92,6 +92,19 @@ import { KandinskyField, KandinskyIcon, KandinskyCircle } from "kandinsky-in-ui"
 `KandinskyCheckerGrid`。すべて`<svg>`の中で使う（自身ではsvgタグを作らない）。
 「カードの角に円を1つだけ添える」のような単発の使い方はこちらを直接使う。
 
+これらを`KandinskyField`/`KandinskyIcon`を経由せず単体で使う場合、モーションと
+ダークモード対応のCSSが自動では読み込まれないため、`<KandinskyStyles />`
+（`styles.tsx`）を一度だけどこかに描画すること。
+
+## ダークモード対応
+
+円の重なりは既定で `mix-blend-mode: multiply` に任せているが、multiplyは
+暗い背景の上ではほぼ黒く潰れて見えなくなる（実機確認済み: ダークモードの
+サイドバーでほぼ視認不可能だった）。`KandinskyStyles` が埋め込むCSSが、
+`[data-theme="dark"]`（手動テーマ切り替えを持つアプリ向け）または
+`prefers-color-scheme: dark`（それ以外のフォールバック）を検知して
+自動的に `screen` に切り替える。個別の設定は不要。
+
 ## モーションの原則
 
 - **動かすのは一部の要素だけ。** 全部を動かすと機械的で騒がしくなる。`KandinskyField`は
@@ -104,6 +117,15 @@ import { KandinskyField, KandinskyIcon, KandinskyCircle } from "kandinsky-in-ui"
   翻訳したもの。値を変える場合も、実機で確認してから反映すること
   （小さい要素の回転・ドリフトは肉眼だとほぼ気づかれないレベルになりがちなので、
   スクリーンショット比較や `getAnimations()` ではなく実際の見た目で判断する）。
+
+## テスト
+
+`generate.ts` / `rng.ts` は副作用のない純粋関数なので、`node:test`（Node標準、
+追加依存なし）で自動テストしている。`npm test` でビルド後に実行される。
+決定論性・color/shapeの妥当性（退化した三角形が無い、色の偏りが無い等）に加え、
+**過去に実際踏んだ回帰（アイコンの16.4%が単色化していたバグ）を専用のテストとして
+固定化している。** 生成ロジックのパラメータを変更する際は、必ず先にこのテストを
+通してから反映すること。CIでもpush/PRごとに自動実行される（`.github/workflows/test.yml`）。
 
 ## 既知の注意点
 

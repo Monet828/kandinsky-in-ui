@@ -17,6 +17,11 @@ interface CommonProps {
   style?: CSSProperties;
 }
 
+function joinClassNames(...parts: (string | undefined | false)[]): string | undefined {
+  const joined = parts.filter(Boolean).join(" ");
+  return joined || undefined;
+}
+
 export interface KandinskyCircleProps extends CommonProps {
   cx: number;
   cy: number;
@@ -24,9 +29,16 @@ export interface KandinskyCircleProps extends CommonProps {
   color: string;
   opacity?: number;
   /**
-   * 他の形状との重なりを mix-blend-mode: multiply に任せるか。
-   * 既定で true。重なった部分の色計算をブラウザに任せることで、
-   * 3枚以上重なっても予測しづらい濁った色にならないようにする。
+   * 他の形状との重なりを mix-blend-mode に任せるか。既定で true。
+   * 重なった部分の色計算をブラウザに任せることで、3枚以上重なっても
+   * 予測しづらい濁った色にならないようにする。
+   *
+   * 明るい背景では multiply、暗い背景（`[data-theme="dark"]` または
+   * `prefers-color-scheme: dark`）では screen に自動で切り替わる
+   * （multiplyは暗い背景では円がほぼ黒く潰れて見えなくなるため）。
+   * この切り替えは `./styles` の CSS が定義しているクラスに依存するので、
+   * `KandinskyField` / `KandinskyIcon` を経由せずこのプリミティブを
+   * 単体で使う場合は `<KandinskyStyles />` を一度だけ描画すること。
    */
   blend?: boolean;
 }
@@ -39,8 +51,8 @@ export function KandinskyCircle({ cx, cy, r, color, opacity = 1, blend = true, c
       r={r}
       fill={color}
       opacity={opacity}
-      className={className}
-      style={{ ...(blend ? { mixBlendMode: "multiply" } : null), ...style }}
+      className={joinClassNames(blend ? "kandinsky-blend" : undefined, className)}
+      style={style}
     />
   );
 }

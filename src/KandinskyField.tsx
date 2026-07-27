@@ -3,6 +3,7 @@
 import { useMemo, type CSSProperties } from "react";
 import { generateKandinskyComposition } from "./generate.js";
 import { KandinskyCircle, KandinskyLine, KandinskyArc, KandinskyTriangle, KandinskyCheckerGrid } from "./primitives.js";
+import { KandinskyStyles } from "./styles.js";
 import type { KandinskyDensity } from "./tokens.js";
 
 export interface KandinskyFieldProps {
@@ -60,28 +61,7 @@ export function KandinskyField({
       className={className}
       aria-hidden="true"
     >
-      {animated && (
-        <style>{`
-          @media (prefers-reduced-motion: no-preference) {
-            .kandinsky-breathe { animation: kandinsky-breathe-kf 3.5s ease-in-out infinite; }
-            .kandinsky-breathe-2 { animation: kandinsky-breathe-kf 4.5s ease-in-out infinite; animation-delay: -1.8s; }
-            .kandinsky-sway { animation: kandinsky-sway-kf 4.5s ease-in-out infinite; }
-            .kandinsky-drift { animation: kandinsky-drift-kf 5s ease-in-out infinite; }
-          }
-          @keyframes kandinsky-breathe-kf {
-            0%, 100% { opacity: var(--kandinsky-peak-opacity, 0.82); }
-            50% { opacity: calc(var(--kandinsky-peak-opacity, 0.82) * 0.45); }
-          }
-          @keyframes kandinsky-sway-kf {
-            0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(24deg); }
-          }
-          @keyframes kandinsky-drift-kf {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(18px, -11px); }
-          }
-        `}</style>
-      )}
+      <KandinskyStyles />
       {shapes.map((shape, i) => {
         let motionClass: string | undefined;
         if (animated) {

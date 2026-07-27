@@ -1,5 +1,6 @@
 import { generateKandinskyIcon } from "./generate.js";
 import { KandinskyCircle } from "./primitives.js";
+import { KandinskyStyles } from "./styles.js";
 
 export interface KandinskyIconProps {
   /** 同じseedなら常に同じ見た目になる。固定のブランドマークとして使うなら固定文字列を渡す */
@@ -17,6 +18,7 @@ export function KandinskyIcon({ seed, size = 20, className }: KandinskyIconProps
 
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <KandinskyStyles />
       {circles.map((c, i) => (
         <KandinskyCircle key={i} cx={c.cx} cy={c.cy} r={c.r} color={c.color} opacity={0.9} />
       ))}

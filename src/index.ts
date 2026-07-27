@@ -26,6 +26,9 @@ export {
   type KandinskyCheckerGridProps,
 } from "./primitives.js";
 
+// 共有CSS（モーション・ブレンドモードのダーク対応）。primitivesを単体で使う場合に必要
+export { KandinskyStyles, KANDINSKY_STYLES_CSS } from "./styles.js";
+
 // 構図生成（Reactに依存しない。独自コンポーネントを組みたい場合の土台）
 export {
   generateKandinskyComposition,
