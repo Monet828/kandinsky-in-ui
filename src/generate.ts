@@ -1,0 +1,145 @@
+/**
+ * Kandinsky in UI — 構図ジェネレータ。
+ *
+ * 円の重なり・直線・弧・三角形・市松格子という語彙を、seed文字列から
+ * 決定的に生成する。同じ seed なら常に同じ構図になる。
+ *
+ * これにより「Unit名をseedにする」だけで、Unitごとに一貫した見た目の
+ * 装飾を手作業のデザインなしに割り当てられる（Unitが増減しても壊れない）。
+ *
+ * React に依存しない純粋関数として実装している。KandinskyField / KandinskyIcon
+ * はこれを描画するReact向けの薄いアダプタという位置づけ。
+ */
+
+import { createSeededRandom } from "./rng";
+import { KANDINSKY_PALETTE, KANDINSKY_INK, type KandinskyDensity } from "./tokens";
+
+export type KandinskyShape =
+  | { kind: "circle"; cx: number; cy: number; r: number; color: string; opacity: number }
+  | { kind: "line"; x1: number; y1: number; x2: number; y2: number }
+  | { kind: "arc"; cx: number; cy: number; r: number; startAngle: number; endAngle: number }
+  | { kind: "triangle"; points: [number, number][]; color: string }
+  | { kind: "checker"; x: number; y: number; cell: number; cols: number; rows: number; rotation: number };
+
+export interface KandinskyComposition {
+  shapes: KandinskyShape[];
+}
+
+const DENSITY_COUNTS: Record<KandinskyDensity, { circles: number; lines: number; checker: boolean }> = {
+  sm: { circles: 3, lines: 1, checker: false },
+  md: { circles: 5, lines: 2, checker: true },
+  lg: { circles: 7, lines: 4, checker: true },
+};
+
+/**
+ * 幅width×高さheightの領域に収まる構図を生成する。
+ * seedが同じなら、width/height/densityが同じ限り常に同じ構図を返す。
+ */
+export function generateKandinskyComposition(
+  seed: string,
+  width: number,
+  height: number,
+  density: KandinskyDensity = "md",
+): KandinskyComposition {
+  const rand = createSeededRandom(seed);
+  const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(rand() * arr.length)];
+  const shapes: KandinskyShape[] = [];
+  const counts = DENSITY_COUNTS[density];
+
+  for (let i = 0; i < counts.circles; i++) {
+    const r = width * 0.06 + rand() * width * 0.15;
+    shapes.push({
+      kind: "circle",
+      cx: rand() * width,
+      cy: rand() * height,
+      r,
+      color: pick(KANDINSKY_PALETTE),
+      opacity: 0.75 + rand() * 0.15,
+    });
+  }
+
+  for (let i = 0; i < counts.lines; i++) {
+    shapes.push({
+      kind: "line",
+      x1: rand() * width,
+      y1: rand() * height,
+      x2: rand() * width,
+      y2: rand() * height,
+    });
+  }
+
+  const arcR = height * 0.08 + rand() * height * 0.08;
+  const arcStart = rand() * Math.PI;
+  shapes.push({
+    kind: "arc",
+    cx: rand() * width,
+    cy: rand() * height,
+    r: arcR,
+    startAngle: arcStart,
+    endAngle: arcStart + Math.PI * (0.4 + rand() * 0.4),
+  });
+
+  const tx = rand() * width;
+  const ty = rand() * height;
+  const s = width * 0.05 + rand() * width * 0.06;
+  shapes.push({
+    kind: "triangle",
+    points: [
+      [tx, ty],
+      [tx + s, ty + s * 0.3],
+      [tx - s * 0.3, ty + s],
+    ],
+    color: pick([...KANDINSKY_PALETTE, KANDINSKY_INK]),
+  });
+
+  if (counts.checker) {
+    const cell = Math.max(10, width * 0.03);
+    const cols = 4;
+    const rows = 4;
+    shapes.push({
+      kind: "checker",
+      x: rand() * Math.max(1, width - cell * cols),
+      y: rand() * Math.max(1, height - cell * rows),
+      cell,
+      cols,
+      rows,
+      rotation: (rand() - 0.5) * 20,
+    });
+  }
+
+  return { shapes };
+}
+
+// ============================================================
+// アイコン用（小さいサイズで使う簡易版）
+// ============================================================
+// フル構図(円・線・弧・三角形・市松)は16-24pxでは読めないため、
+// 重なる円2個だけの「Circles in a Circle」に絞った専用ロジック。
+// 円3個+multiplyだと小さいサイズでは重なりすぎて黒く潰れるため、
+// 2個に絞り位置も広めに散らして「重なって混ざる部分」が見える程度にする。
+
+export interface KandinskyIconCircle {
+  cx: number;
+  cy: number;
+  r: number;
+  color: string;
+}
+
+export interface KandinskyIconComposition {
+  circles: KandinskyIconCircle[];
+}
+
+export function generateKandinskyIcon(seed: string, size = 24): KandinskyIconComposition {
+  // フル構図と同じseedを渡された時に見た目が連動しすぎないよう、接尾辞で名前空間を分ける。
+  const rand = createSeededRandom(`${seed}:icon`);
+  const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(rand() * arr.length)];
+
+  const circles: KandinskyIconCircle[] = [];
+  for (let i = 0; i < 2; i++) {
+    const r = size * 0.24 + rand() * size * 0.1;
+    const cx = size * 0.22 + rand() * size * 0.56;
+    const cy = size * 0.22 + rand() * size * 0.56;
+    circles.push({ cx, cy, r, color: pick(KANDINSKY_PALETTE) });
+  }
+  return { circles };
+}

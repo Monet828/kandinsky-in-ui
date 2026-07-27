@@ -1,0 +1,31 @@
+{
+  "name": "kandinsky-in-ui",
+  "version": "0.1.0",
+  "description": "A generative geometric-abstraction design system for UI, inspired by Wassily Kandinsky (Circles in a Circle). Seed-based, deterministic, framework core with a React adapter.",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "typescript": "^5"
+  },
+  "keywords": [
+    "design-system",
+    "generative-art",
+    "svg",
+    "react",
+    "kandinsky"
+  ]
+}
