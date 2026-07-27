@@ -15,14 +15,6 @@ Reactアダプタ（`primitives.tsx` / `KandinskyField.tsx` / `KandinskyIcon.tsx
 切り出したばかりの段階。npm には未公開。使う場合は現状 `src/` を直接コピーするか、
 このリポジトリをローカルビルド（`npm install && npm run build`）して `dist/` を参照する。
 
-## この言語が生まれた背景
-
-社内ツールのログイン画面のデザインを探索する中で、「マティス風の切り絵」「雑誌の
-スクラップブック・コラージュ」を経て、最終的にカンディンスキーの幾何学抽象に着地した。
-コードとしての実装だけでなく、GitHub上に類似の先行事例（`ideo/generative-kandinsky`、
-`geopattern` 等）を調査した上で技法を一部取り込んでいる（円の重なりを
-`mix-blend-mode: multiply` に任せる、など）。
-
 ## 使い方
 
 ```tsx
@@ -44,9 +36,9 @@ import { KandinskyField, KandinskyIcon, KandinskyCircle } from "kandinsky-in-ui"
 視線誘導を確実に損なう。装飾的な生成アートは低密度画面でこそ機能し、高密度な
 データ画面では機能しにくい、という原則に基づく判断（実機確認済み）。
 
-## 決定的な生成（seed）
+## 決定論的な生成（seed）
 
-すべての構図は文字列seedから `mulberry32` による決定的な擬似乱数で生成される。
+すべての構図は文字列seedから `mulberry32` による決定論的な擬似乱数で生成される。
 同じseed・同じ引数なら、リロードしても常に同じ見た目になる。
 
 ```tsx

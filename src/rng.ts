@@ -1,11 +1,11 @@
 /**
- * Kandinsky in UI — 決定的な擬似乱数。
+ * Kandinsky in UI — 決定論的な擬似乱数。
  *
  * 見た目の再現性のためだけに使う（暗号用途ではない）。文字列seedから
  * 常に同じ数列を作れることが、この設計システム全体の前提になっている。
  */
 
-// mulberry32: 軽量な決定的PRNG。
+// mulberry32: 軽量な決定論的PRNG。
 export function mulberry32(seed: number): () => number {
   let s = seed;
   return function random() {
@@ -25,7 +25,7 @@ export function hashSeed(input: string): number {
   return h;
 }
 
-/** 文字列seedから直接、決定的な乱数関数を作る */
+/** 文字列seedから直接、決定論的な乱数関数を作る */
 export function createSeededRandom(seed: string): () => number {
   return mulberry32(hashSeed(seed));
 }

@@ -36,7 +36,7 @@ export {
   type KandinskyIconComposition,
 } from "./generate";
 
-// 決定的乱数（独自の生成ロジックを書きたい場合）
+// 決定論的乱数（独自の生成ロジックを書きたい場合）
 export { createSeededRandom, mulberry32, hashSeed } from "./rng";
 
 // トークン
